@@ -76,6 +76,91 @@ function Dropdown({ label, options, value, onChange, interactive = true }: Dropd
   );
 }
 
+function SelectField({
+  label,
+  options,
+  value,
+  onChange,
+  disabled = false,
+  invalid = false,
+  exclude,
+}: {
+  label: string;
+  options: string[];
+  value: string;
+  onChange: (value: string) => void;
+  disabled?: boolean;
+  invalid?: boolean;
+  exclude?: string;
+}) {
+  const [open, setOpen] = useState(false);
+  const root = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const closeOnClickOutside = (event: MouseEvent) => {
+      if (!root.current?.contains(event.target as Node)) setOpen(false);
+    };
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setOpen(false);
+    };
+    document.addEventListener("mousedown", closeOnClickOutside);
+    document.addEventListener("keydown", closeOnEscape);
+    return () => {
+      document.removeEventListener("mousedown", closeOnClickOutside);
+      document.removeEventListener("keydown", closeOnEscape);
+    };
+  }, []);
+
+  return (
+    <label className="form-field">
+      <span>{label}</span>
+      <div
+        className={`select-wrap ${open ? "is-open" : ""} ${disabled ? "is-disabled" : ""} ${invalid ? "is-error" : ""}`}
+        ref={root}
+      >
+        <button
+          type="button"
+          className="select-trigger"
+          disabled={disabled}
+          aria-haspopup="listbox"
+          aria-expanded={open}
+          onClick={() => setOpen((current) => !current)}
+        >
+          <span className={value ? "" : "select-placeholder"}>{value || "Выберите"}</span>
+          <img
+            className={`transition-transform ${open ? "rotate-180" : ""}`}
+            src={`${assets}/fd2eb.svg`}
+            alt=""
+          />
+        </button>
+        {open && !disabled && (
+          <div className="dropdown-menu select-menu" role="listbox" aria-label={label}>
+            {options.map((option) => {
+              const unavailable = option === exclude;
+              return (
+                <button
+                  type="button"
+                  role="option"
+                  aria-selected={option === value}
+                  key={option}
+                  disabled={unavailable}
+                  className={option === value ? "is-selected" : ""}
+                  onClick={() => {
+                    onChange(option);
+                    setOpen(false);
+                  }}
+                >
+                  {option}
+                </button>
+              );
+            })}
+          </div>
+        )}
+      </div>
+    </label>
+  );
+}
+
 function MenuRow({
   children,
   depth = 0,
@@ -489,6 +574,7 @@ function RuleForm({
   const [calendarOpen, setCalendarOpen] = useState(false);
   const [saved, setSaved] = useState(Boolean(initialRule));
   const [editing, setEditing] = useState(false);
+  const [errors, setErrors] = useState({ standard: false, segment: false, markup: false });
   const [createdRuleNumber] = useState(initialRule?.id ?? ruleNumber);
   const [createdAt, setCreatedAt] = useState(initialRule?.created ?? "");
   const [editedAt, setEditedAt] = useState("");
@@ -546,6 +632,13 @@ function RuleForm({
 
   const submit = (event: React.FormEvent) => {
     event.preventDefault();
+    const nextErrors = {
+      standard: !standard,
+      segment: !segment,
+      markup: !markup,
+    };
+    setErrors(nextErrors);
+    if (nextErrors.standard || nextErrors.segment || nextErrors.markup) return;
     const status = activation && activation > toDateValue(today) ? "Планируемое" : "Активное";
     const values: RuleFormValues = {
       standard,
@@ -650,59 +743,47 @@ function RuleForm({
               </div>
 
               <div className="form-row">
-                <label className="form-field">
-                  <span>Стандарт</span>
-                  <div className="select-wrap">
-                    <select
-                      required
-                      disabled={saved}
-                      value={standard}
-                      onChange={(event) => setStandard(event.target.value)}
-                    >
-                      <option value="" disabled />
-                      {priceGroupOptions.map((option) => (
-                        <option key={option} value={option} disabled={option === segment}>
-                          {option}
-                        </option>
-                      ))}
-                    </select>
-                    <img src={`${assets}/fd2eb.svg`} alt="" />
-                  </div>
-                </label>
+                <SelectField
+                  label="Стандарт"
+                  options={priceGroupOptions}
+                  value={standard}
+                  disabled={saved}
+                  invalid={errors.standard}
+                  exclude={segment}
+                  onChange={(value) => {
+                    setStandard(value);
+                    setErrors((current) => ({ ...current, standard: false }));
+                  }}
+                />
 
-                <label className="form-field">
-                  <span>Сегмент</span>
-                  <div className="select-wrap">
-                    <select
-                      required
-                      disabled={saved}
-                      value={segment}
-                      onChange={(event) => setSegment(event.target.value)}
-                    >
-                      <option value="" disabled />
-                      {priceGroupOptions.map((option) => (
-                        <option key={option} value={option} disabled={option === standard}>
-                          {option}
-                        </option>
-                      ))}
-                    </select>
-                    <img src={`${assets}/fd2eb.svg`} alt="" />
-                  </div>
-                </label>
+                <SelectField
+                  label="Сегмент"
+                  options={priceGroupOptions}
+                  value={segment}
+                  disabled={saved}
+                  invalid={errors.segment}
+                  exclude={standard}
+                  onChange={(value) => {
+                    setSegment(value);
+                    setErrors((current) => ({ ...current, segment: false }));
+                  }}
+                />
               </div>
 
               <div className="form-row form-row-center">
                 <label className="form-field">
                   <span>Надбавка</span>
-                  <div className="numeric-wrap">
+                  <div className={`numeric-wrap ${errors.markup ? "is-error" : ""}`}>
                     <input
-                      required
                       min="0"
                       max="100"
                       step="0.1"
                       type="number"
                       value={markup}
-                      onChange={(event) => setMarkup(event.target.value)}
+                      onChange={(event) => {
+                        setMarkup(event.target.value);
+                        setErrors((current) => ({ ...current, markup: false }));
+                      }}
                     />
                     <span>%</span>
                   </div>
