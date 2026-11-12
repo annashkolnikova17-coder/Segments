@@ -11,12 +11,23 @@ type Rule = {
   kc: string;
   activation: string;
   created: string;
+  author: string;
   beautifulPrice: boolean;
   attributes: string[];
   categoryLevels: number[];
   categorySelections: Record<number, string[]>;
   uploadedFile: string;
 };
+
+const ruleAuthor = "К. Ермолаев";
+
+function formatCreatedAt(date: Date) {
+  return new Intl.DateTimeFormat("ru-RU", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "2-digit",
+  }).format(date);
+}
 
 type DropdownProps = {
   label: string;
@@ -391,7 +402,7 @@ function toDateValue(date: Date) {
 
 function formatDateValue(value: string) {
   const [year, month, day] = value.split("-");
-  return value ? `${day}.${month}.${year}` : "";
+  return value ? `${day}.${month}.${year.slice(-2)}` : "";
 }
 
 function ReadOnlyRuleContent({
@@ -406,6 +417,7 @@ function ReadOnlyRuleContent({
   uploadedFile,
   createdAt,
   editedAt,
+  author,
 }: {
   standard: string;
   segment: string;
@@ -418,6 +430,7 @@ function ReadOnlyRuleContent({
   uploadedFile: string;
   createdAt: string;
   editedAt: string;
+  author: string;
 }) {
   return (
     <div className="saved-rule-layout">
@@ -525,13 +538,13 @@ function ReadOnlyRuleContent({
         <div className="history-item">
           <span>Создано</span>
           <strong>{createdAt}</strong>
-          <small>Иванов И.</small>
+          <small>{author}</small>
         </div>
         {editedAt && (
           <div className="history-item">
             <span>Отредактировано</span>
             <strong>{editedAt}</strong>
-            <small>Иванов И.</small>
+            <small>{author}</small>
           </div>
         )}
       </aside>
@@ -654,11 +667,11 @@ function RuleForm({
     };
     if (!saved) {
       onSave(values);
-      setCreatedAt(new Intl.DateTimeFormat("ru-RU").format(new Date()));
+      setCreatedAt(formatCreatedAt(new Date()));
       setSaved(true);
     } else {
       onUpdate(createdRuleNumber, values);
-      setEditedAt(new Intl.DateTimeFormat("ru-RU").format(new Date()));
+      setEditedAt(formatCreatedAt(new Date()));
     }
     setCalendarOpen(false);
     setEditing(false);
@@ -733,6 +746,7 @@ function RuleForm({
             uploadedFile={uploadedFile}
             createdAt={createdAt}
             editedAt={editedAt}
+            author={initialRule?.author ?? ruleAuthor}
           />
         ) : (
           <form id="rule-form" className="rule-form" onSubmit={submit}>
@@ -811,7 +825,7 @@ function RuleForm({
                 >
                   <img src={`${assets}/3b63e.svg`} alt="" />
                   <span className={activation ? "" : "date-placeholder"}>
-                    {activation ? formatDateValue(activation) : "дд.мм.гггг"}
+                    {activation ? formatDateValue(activation) : "дд.мм.гг"}
                   </span>
                 </button>
                 {calendarOpen && (
@@ -1220,9 +1234,10 @@ export default function App() {
         standard: values.standard,
         segment: values.segment,
         markup: `${values.markup}%`,
-        kc: "—",
+        kc: values.beautifulPrice ? "Да" : "Нет",
         activation: values.activation,
-        created: new Intl.DateTimeFormat("ru-RU").format(new Date()),
+        created: formatCreatedAt(new Date()),
+        author: ruleAuthor,
         beautifulPrice: values.beautifulPrice,
         attributes: values.attributes,
         categoryLevels: values.categoryLevels,
@@ -1242,6 +1257,7 @@ export default function App() {
               ...rule,
               status: values.status,
               markup: `${values.markup}%`,
+              kc: values.beautifulPrice ? "Да" : "Нет",
               activation: values.activation,
               beautifulPrice: values.beautifulPrice,
               attributes: values.attributes,
@@ -1390,7 +1406,10 @@ export default function App() {
                           <div>{rule.markup}</div>
                           <div>{rule.kc}</div>
                           <div>{rule.activation ? formatDateValue(rule.activation) : "Сразу"}</div>
-                          <div>{rule.created}</div>
+                          <div className="created-cell">
+                            <strong>{rule.created}</strong>
+                            <small>{rule.author}</small>
+                          </div>
                         </div>
                       ))}
                     </div>
