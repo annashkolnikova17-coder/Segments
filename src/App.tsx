@@ -126,7 +126,7 @@ function SelectField({
           aria-expanded={open}
           onClick={() => setOpen((current) => !current)}
         >
-          <span className={value ? "" : "select-placeholder"}>{value || "Выберите"}</span>
+          <span>{value}</span>
           <img
             className={`transition-transform ${open ? "rotate-180" : ""}`}
             src={`${assets}/fd2eb.svg`}

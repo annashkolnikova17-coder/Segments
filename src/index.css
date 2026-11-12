@@ -765,10 +765,6 @@
   white-space: nowrap;
 }
 
-.select-placeholder {
-  color: #adafb1;
-}
-
 .select-wrap.is-open {
   border-color: #0072e5;
   box-shadow: 0 0 0 1px #0072e5;
