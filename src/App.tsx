@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 
-const assets = "/assets";
+const assets = `${import.meta.env.BASE_URL}assets`;
 
 type Rule = {
   id: number;
@@ -422,7 +422,7 @@ function ReadOnlyRuleContent({
               <div className="products-added">
                 <span>Добавлено: 25 000 GUID</span>
                 <a
-                  href="/downloads/guid-exclusions.xlsx"
+                  href={`${import.meta.env.BASE_URL}downloads/guid-exclusions.xlsx`}
                   download="guid-exclusions.xlsx"
                   aria-label="Скачать список GUID"
                 >
@@ -984,7 +984,7 @@ function RuleForm({
                     <div className="products-added">
                       <span>Добавлено: 25 000 GUID</span>
                       <a
-                        href="/downloads/guid-exclusions.xlsx"
+                        href={`${import.meta.env.BASE_URL}downloads/guid-exclusions.xlsx`}
                         download="guid-exclusions.xlsx"
                         aria-label="Скачать список GUID"
                       >
