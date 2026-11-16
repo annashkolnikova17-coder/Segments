@@ -1190,7 +1190,7 @@ function RuleForm({
 const columns = [
   ["ID", "100px"],
   ["Статус", "180px"],
-  ["Стандарт", "200px"],
+  ["Родительская группа", "200px"],
   ["Сегмент", "200px"],
   ["Надбавка", "124px"],
   ["КЦ", "100px"],
@@ -1340,9 +1340,9 @@ export default function App() {
               {filtersVisible && (
                 <div className="filter-bar">
                   <Dropdown
-                    label="Фильтр по стандарту"
+                    label="Фильтр по родительской группе"
                     options={["Стандарт", "Стандарт 1", "Стандарт 2"]}
-                    value="Стандарт"
+                    value="Родительская группа"
                     interactive={false}
                   />
                   <Dropdown
