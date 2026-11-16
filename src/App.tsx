@@ -471,7 +471,7 @@ function ReadOnlyRuleContent({
         <section className="form-card readonly-card exceptions-card">
           <div className="form-card-heading">
             <h2>Исключения из сегмента</h2>
-            <p>Для всех исключений цена будет равна стандартной</p>
+            <p>Для всех исключений применится цена родительской группы</p>
           </div>
           <div className="readonly-section">
             <h3>Атрибуты</h3>
@@ -758,7 +758,7 @@ function RuleForm({
 
               <div className="form-row">
                 <SelectField
-                  label="Стандарт"
+                  label="Родительская группа"
                   options={priceGroupOptions}
                   value={standard}
                   disabled={saved}
@@ -892,7 +892,7 @@ function RuleForm({
             <section className="form-card exceptions-card">
               <div className="form-card-heading">
                 <h2>Исключения из сегмента</h2>
-                <p>Для всех исключений цена будет равна стандартной</p>
+                <p>Для всех исключений применится цена родительской группы</p>
               </div>
 
               <div className="fieldset">
